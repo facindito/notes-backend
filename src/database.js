@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
-const { mongodbURL } = require('./config')
+const { mongodbURL, mongodbURLTest, NODE_ENV } = require('./config')
 
-const connectionString = mongodbURL
+const connectionString =
+  process.env.NODE_ENV === 'test' ? mongodbURLTest : mongodbURL
 
 //connection to mongodb
 mongoose
