@@ -3,14 +3,18 @@ const bcrypt = require('bcrypt')
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const users = await User.find({})
+    const users = await User.find({}).populate('notes', {
+      content: 1,
+      date: 1,
+    })
     res.json(users)
   } catch (err) {
+    console.error(err)
     next(err)
   }
 }
 
-const createUser = async (req, res, next) => {
+const createUser = async (req, res) => {
   try {
     const { username, name, password } = req.body
 
