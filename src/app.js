@@ -5,6 +5,7 @@ const notFound = require('./middleware/notFound')
 const handleErrors = require('./middleware/handleErrors')
 const notesRoutes = require('./routes/notes.routes')
 const usersRoutes = require('./routes/users.routes')
+const loginRoutes = require('./routes/login.routes')
 
 const app = express()
 
@@ -18,6 +19,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/notes', notesRoutes)
 app.use('/api/users', usersRoutes)
+app.use('/api/login', loginRoutes)
 
 app.use(notFound)
 app.use(handleErrors)

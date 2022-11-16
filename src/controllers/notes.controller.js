@@ -1,5 +1,6 @@
 const Note = require('../models/Note')
 const User = require('../models/User')
+const jwt = require('jsonwebtoken')
 
 const getAllNotes = async (req, res, next) => {
   try {
@@ -27,24 +28,43 @@ const getOneNote = async (req, res, next) => {
   }
 }
 
+const getTokenFrom = (req) => {
+  const authorization = req.get('authorization')
+  return authorization && authorization.toLowerCase().startsWith('bearer ')
+    ? authorization.substring(7)
+    : null
+}
+
 const createNote = async (req, res, next) => {
-  const { content, important = false, userId } = req.body
+  const { content, important = false } = req.body
 
-  const user = await User.findById(userId)
-
-  if (!content) {
-    return res.status(400).json({
-      error: { message: 'Note content missing' },
-    })
-  }
-
-  const newNote = new Note({
-    content,
-    date: new Date(),
-    important,
-    user: user._id,
-  })
   try {
+    const token = getTokenFrom(req)
+    const decodedToken = jwt.verify(token, process.env.SECRET)
+
+    if (!token || !decodedToken.id) {
+      return res.status(401).json({
+        error: {
+          message: 'token missing or invalid',
+        },
+      })
+    }
+
+    const { id: userId } = decodedToken
+    const user = await User.findById(userId)
+
+    if (!content) {
+      return res.status(400).json({
+        error: { message: 'Note content missing' },
+      })
+    }
+
+    const newNote = new Note({
+      content,
+      date: new Date(),
+      important,
+      user: user._id,
+    })
     const savedNote = await newNote.save()
 
     user.notes = user.notes.concat(savedNote._id)
